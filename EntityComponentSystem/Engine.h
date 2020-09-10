@@ -2,15 +2,24 @@
 #define _ENGINE_H_
 
 #include "EntityManager.h"
+#include "Timer.h"
+#include "SystemManager.h"
 
 namespace ECS {
 
 	class Engine {
 	private:
-		EntityManager* ECS_EntityManager;
+		Timer* engineTime;
+		EntityManager* entityManager;
+		SystemManager* systemManager;
 	public:
 
-		EntityManager* GetEntityManager() { return ECS_EntityManager; }
+		Engine();
+		~Engine();
+
+		EntityManager* GetEntityManager() { return entityManager; }
+		
+		SystemManager* GetSystemManager() { return systemManager; }
 
 		void Update(float tick_ms);
 	};

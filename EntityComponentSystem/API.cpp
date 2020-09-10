@@ -20,8 +20,3 @@ void ECS::Terminate()
 
 	// check for memory leaks
 }
-
-int main() {
-	return 0;
-}
-

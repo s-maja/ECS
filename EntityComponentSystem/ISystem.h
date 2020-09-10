@@ -3,17 +3,31 @@
 
 namespace ECS {
 
-	// Implement SystemBase to create a systems in ECS.
 	class ISystem {
 	private:
-
+		bool enabled;
 	public:
 		ISystem();
 		~ISystem();
 
-		virtual void OnCreate() {}
-		virtual void OnDestroy() {}
-		virtual void OnUpdate() {}
+		virtual inline const size_t GetSystemTypeID() const = 0;
+
+
+		virtual void OnCreate() = 0;
+		virtual void OnDestroy() = 0;
+		virtual void OnUpdate() = 0;
+
+		bool IsEnabled() {
+			return enabled;
+		}
+
+		void Enable() {
+			enabled = true;
+		}
+
+		void Disable() {
+			enabled = false;
+		}
 	};
 
 }
