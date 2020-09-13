@@ -34,6 +34,7 @@ ECS::Archetype::Archetype(std::initializer_list<ComponentType> componentTypes)
 	this->entityCount = 0;
 	this->types = (ComponentType*)malloc(count*sizeof(ComponentType));
 	this->typesCount = count;
+	this->capacityChunkWithEmptySlots = 10;
 
 	//sort ComponentType by index and put inarray types
 	int i = 0;
@@ -62,24 +63,25 @@ ECS::Archetype::Archetype(std::initializer_list<ComponentType> componentTypes)
 	this->sizeOfs[0] = sizeof(Entity);
 	i = 0;
 	for (auto it = std::begin(componentTypes); it != std::end(componentTypes); ++it) {
-		sizeOfs[i + 1] = sizeof(*it);
+		sizeOfs[i + 1] = ((ComponentType)*it).GetSize();
 		i++;
 	}
 	
 	this->chunkCapacity = CalculateChunkCapacity(Chunk::GetChunkBufferSize(), sizeOfs, count);
 
-	for (int i = 1; i < count; i++)
-		this->offsets[i + 1] = Align(this->chunkCapacity * sizeOfs[i], 64);
+	for (int i = 1; i <= count; i++)
+		this->offsets[i] = Align(this->chunkCapacity * sizeOfs[i-1], 64);
 }
 
 ECS::Archetype::Archetype(std::list<ComponentType> componentTypes)
 {
-	int count = componentTypes.size();
+	size_t count = componentTypes.size();
 
 	this->numberOfChunksWithEmptySlots = 0;
 	this->entityCount = 0;
 	this->types = (ComponentType*)malloc(count * sizeof(ComponentType));
 	this->typesCount = count;
+	this->capacityChunkWithEmptySlots = 10;
 
 	//sort ComponentType by index and put inarray types
 	int i = 0;
@@ -108,36 +110,121 @@ ECS::Archetype::Archetype(std::list<ComponentType> componentTypes)
 	this->sizeOfs[0] = sizeof(Entity);
 	i = 0;
 	for (auto it = std::begin(componentTypes); it != std::end(componentTypes); ++it) {
-		sizeOfs[i + 1] = sizeof(*it);
+		sizeOfs[i + 1] = ((ComponentType)*it).GetSize();
 		i++;
 	}
 
 	this->chunkCapacity = CalculateChunkCapacity(Chunk::GetChunkBufferSize(), sizeOfs, count);
 
-	for (int i = 1; i < count; i++)
-		this->offsets[i + 1] = Align(this->chunkCapacity * sizeOfs[i], 64);
+	for (int i = 1; i <= count; i++)
+		this->offsets[i] = Align(this->chunkCapacity * sizeOfs[i-1], 64);
+}
+
+ECS::Archetype::Archetype(Archetype&& oldArch)
+{
+	entityCount = oldArch.entityCount;
+	chunkCapacity = oldArch.chunkCapacity;
+	typesCount = oldArch.typesCount;
+
+	// Index matches archetype types
+	this->sizeOfs = (int*)malloc(sizeof(int) * ((unsigned long long)typesCount + 1));
+	this->offsets = (int*)malloc(sizeof(int) * ((unsigned long long)typesCount + 1));
+	this->types= (ComponentType*)malloc(typesCount * sizeof(ComponentType));;
+
+	for (int i = 0; i < typesCount; i++) {
+		sizeOfs[i] = oldArch.sizeOfs[i];
+		offsets[i] = oldArch.offsets[i];
+		types[i] = oldArch.types[i];
+	}
+
+	chunks = oldArch.chunks;
+
+	chunksWithEmptySlots = NULL;
+	numberOfChunksWithEmptySlots = oldArch.numberOfChunksWithEmptySlots;
+}
+
+ECS::Archetype::Archetype(const Archetype& oldArch)
+{
+	entityCount = oldArch.entityCount;
+	chunkCapacity = oldArch.chunkCapacity;
+	typesCount = oldArch.typesCount;
+
+	// Index matches archetype types
+	this->sizeOfs = (int*)malloc(sizeof(int) * ((unsigned long long)typesCount + 1));
+	this->offsets = (int*)malloc(sizeof(int) * ((unsigned long long)typesCount + 1));
+	this->types = (ComponentType*)malloc(typesCount * sizeof(ComponentType));;
+
+	for (int i = 0; i < typesCount; i++) {
+		sizeOfs[i] = oldArch.sizeOfs[i];
+		offsets[i] = oldArch.offsets[i];
+		types[i] = oldArch.types[i];
+	}
+
+	chunks = oldArch.chunks;
+
+	chunksWithEmptySlots = NULL;
+	numberOfChunksWithEmptySlots = oldArch.numberOfChunksWithEmptySlots;
 }
 
 ECS::Archetype::~Archetype()
 {
 	delete(chunks);
-	free(offsets);
-	free(sizeOfs);
-	free(types);
+	if(offsets!=NULL) (offsets);
+	if (sizeOfs != NULL) free(sizeOfs);
+	if (types != NULL)free(types);
 
 	for (int i = 0; i < numberOfChunksWithEmptySlots; i++) {
 		free(chunksWithEmptySlots[i]);
 	}
-	free(chunksWithEmptySlots);
+	if(chunksWithEmptySlots!=NULL) free(chunksWithEmptySlots);
 
 	chunksWithEmptySlots = NULL;
+}
 
+Archetype& ECS::Archetype::operator=(const Archetype& oldArch)
+{
+		if (this != &oldArch) {
+			/*if(chunks) delete(chunks);
+			if (offsets) free(offsets);
+			if (sizeOfs) free(sizeOfs);
+			if (types) free(types);
+			for (int i = 0; i < numberOfChunksWithEmptySlots; i++) {
+				free(chunksWithEmptySlots[i]);
+			}
+			if(chunksWithEmptySlots) free(chunksWithEmptySlots);
+			chunksWithEmptySlots = NULL;*/
+
+			//copy
+			entityCount = oldArch.entityCount;
+			chunkCapacity = oldArch.chunkCapacity;
+			typesCount = oldArch.typesCount;
+			capacityChunkWithEmptySlots = oldArch.capacityChunkWithEmptySlots;
+
+			// Index matches archetype types
+			this->sizeOfs = (int*)malloc(sizeof(int) * ((unsigned long long)typesCount + 1));
+			this->offsets = (int*)malloc(sizeof(int) * ((unsigned long long)typesCount + 1));
+			this->types = (ComponentType*)malloc(typesCount * sizeof(ComponentType));;
+
+			for (int i = 0; i <= typesCount; i++) {
+				sizeOfs[i] = oldArch.sizeOfs[i];
+				offsets[i] = oldArch.offsets[i];
+				if(i!= typesCount)
+					types[i] = oldArch.types[i];
+			}
+
+			chunks = new ArchetypeChunkArray();
+			*chunks = *oldArch.chunks;
+
+			chunksWithEmptySlots = NULL;
+			numberOfChunksWithEmptySlots = oldArch.numberOfChunksWithEmptySlots;
+		}
+	return *this;
 }
 
 Chunk* ECS::Archetype::GetExistingChunkWithEmptySlots()
 {
 	if (chunksWithEmptySlots == NULL)
-		return NULL;
+		return nullptr;
 	Chunk* chunk = chunksWithEmptySlots[0];
 	numberOfChunksWithEmptySlots--;
 
@@ -150,7 +237,17 @@ Chunk* ECS::Archetype::GetExistingChunkWithEmptySlots()
 
 void ECS::Archetype::AddToChunkListWithEmptySlots(Chunk* chunk)
 {
-	chunksWithEmptySlots[numberOfChunksWithEmptySlots] = chunk;
+	if (chunksWithEmptySlots == NULL) {
+		chunksWithEmptySlots = (Chunk**)malloc(sizeof(Chunk*) * capacityChunkWithEmptySlots);
+		for (int i = 0; i < capacityChunkWithEmptySlots; i++)
+			chunksWithEmptySlots[i] = nullptr;
+	}
+	else if (numberOfChunksWithEmptySlots != 0 && (numberOfChunksWithEmptySlots% capacityChunkWithEmptySlots == 0) ){
+		chunksWithEmptySlots = (Chunk**)realloc(chunksWithEmptySlots, sizeof(Chunk*) * (capacityChunkWithEmptySlots+numberOfChunksWithEmptySlots));
+		for (int i = numberOfChunksWithEmptySlots; i < capacityChunkWithEmptySlots+numberOfChunksWithEmptySlots; i++)
+			chunksWithEmptySlots[i] = nullptr;
+	}
+	chunksWithEmptySlots[numberOfChunksWithEmptySlots++] = chunk;
 }
 
 void ECS::Archetype::AddToChunkList(Chunk* chunk)
@@ -170,7 +267,7 @@ Entity* ECS::Archetype::AllocateEntity(ComponentType* types)
 	chunks->GetCurrentChunk()->IncrementCount();
 
 	//Initialize Components
-	for (int t = 1; t != typesCount; t++) {
+	for (int t = 1; t <= typesCount; t++) {
 		int offset = offsets[t];
 		int sizeOf = sizeOfs[t];
 
@@ -197,18 +294,6 @@ int ECS::Archetype::GetIndexInTypeArray(ComponentType type)
 }
 
 
-template<class T>
-int Archetype::GetIndexInTypeArray()
-{
-	T t;
-	for(int i = 0; i < typesCount; i++) {
-		if (types[i].GetTypeInfo() == typeid(t))
-			return i;
-	}
-
-	return -1;
-}
-
 ComponentType ECS::Archetype::GetTypeInTypeArray(int index)
 {
 	return types[index];
@@ -216,7 +301,7 @@ ComponentType ECS::Archetype::GetTypeInTypeArray(int index)
 
 bool ECS::Archetype::Compare(std::initializer_list<ComponentType> componentTypes)
 {
-	ComponentType* temp = new ComponentType[componentTypes.size()];
+	ComponentType* temp = (ComponentType*) malloc(sizeof(ComponentType)*componentTypes.size());
 
 	//sort componentTypes by index and put inarray types
 	int i = 0;
@@ -250,7 +335,7 @@ bool ECS::Archetype::Compare(std::initializer_list<ComponentType> componentTypes
 
 bool ECS::Archetype::Compare(std::list<ComponentType> componentTypes)
 {
-	ComponentType* temp = new ComponentType[componentTypes.size()];
+	ComponentType* temp = (ComponentType*)malloc(sizeof(ComponentType) * componentTypes.size());
 
 	//sort componentTypes by index and put inarray types
 	int i = 0;

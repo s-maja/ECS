@@ -30,6 +30,7 @@ namespace ECS {
 
 		Chunk** chunksWithEmptySlots;
 		int numberOfChunksWithEmptySlots;
+		int capacityChunkWithEmptySlots;
 
 		int CalculateChunkCapacity(int bufferSize, int* componentSizes, int count);
 		int CalculateSpaceRequirement(int* componentSizes, int componentCount, int entityCount);
@@ -37,7 +38,10 @@ namespace ECS {
 	public:
 		Archetype(std::initializer_list<ComponentType> componentTypes);
 		Archetype(std::list<ComponentType> componentTypes);
+		Archetype(const Archetype&);
+		Archetype(Archetype&&);
 		~Archetype();
+		Archetype& operator=(const Archetype& t);
 
 		int GetTypesCount() {
 			return this->typesCount;
@@ -61,6 +65,10 @@ namespace ECS {
 
 		void DecrementEntityCount() {
 			entityCount--;
+		}
+
+		void SetCount(int i) {
+			this->entityCount = i;
 		}
 
 		int GetEntityCount() {
@@ -111,7 +119,17 @@ namespace ECS {
 		}
 	};
 
+	template<class T>
+	inline int Archetype::GetIndexInTypeArray()
+	{
+		T t;
+		for (int i = 0; i < typesCount; i++) {
+			if (types[i].GetTypeInfo() == typeid(t))
+				return i;
+		}
 
+		return -1;
+	}
 }
 
 #endif // !_ARCHETYPE_H_

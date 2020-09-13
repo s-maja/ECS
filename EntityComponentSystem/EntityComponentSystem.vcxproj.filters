@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Tests header">
+      <UniqueIdentifier>{2d27f96f-0a2e-44f9-8966-664df7bab1b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tests source">
+      <UniqueIdentifier>{852f51cb-3f95-4cdd-a18d-fab1ef17d929}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -45,11 +51,11 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SystemTypeID.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Tests source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +106,21 @@
     </ClInclude>
     <ClInclude Include="SystemTypeID.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementComponent.h">
+      <Filter>Header Files\Tests header</Filter>
+    </ClInclude>
+    <ClInclude Include="Lifetime.h">
+      <Filter>Header Files\Tests header</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerSystem.h">
+      <Filter>Header Files\Tests header</Filter>
+    </ClInclude>
+    <ClInclude Include="EnamySystem.h">
+      <Filter>Header Files\Tests header</Filter>
+    </ClInclude>
+    <ClInclude Include="RotationComponent.h">
+      <Filter>Header Files\Tests header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

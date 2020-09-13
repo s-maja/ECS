@@ -52,6 +52,10 @@ namespace ECS {
 			this->count--;
 		}
 
+		void SetCount(int i) {
+			this->count = i;
+		}
+
 		int GetCapacity() {
 			return capacity;
 		}
@@ -77,6 +81,10 @@ namespace ECS {
 
 		uint8_t* GetBuffer() {
 			return buffer;
+		}
+
+		int GetId() {
+			return id;
 		}
 
 		bool Has(ComponentType componentType);

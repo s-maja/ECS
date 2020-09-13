@@ -23,6 +23,15 @@ namespace ECS {
 			this->type = &type;
 		}
 
+		ComponentType& operator=(const ComponentType& compType) {
+			if (this != &compType) {
+				index = compType.index;
+				size = compType.size;
+				type = compType.type;
+			}
+			return *this;
+		}
+
 		int GetIndex() {
 			return index;
 		}

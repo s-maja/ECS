@@ -1,8 +1,2 @@
-﻿  API.cpp
-  Engine.cpp
-  Main.cpp
-  SystemManager.cpp
-  SystemTypeID.cpp
-  Timer.cpp
-  Generating Code...
+﻿  Main.cpp
   EntityComponentSystem.vcxproj -> C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\x64\Debug\EntityComponentSystem.exe

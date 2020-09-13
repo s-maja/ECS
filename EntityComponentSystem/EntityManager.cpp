@@ -2,12 +2,23 @@
 #include <list>
 using namespace ECS;
 
-Chunk* ECS::EntityManager::GetChunkWithEmptySlots(Archetype archetype)
+Chunk* ECS::EntityManager::GetChunkWithEmptySlots(Archetype* archetype)
 {
-	return archetype.GetExistingChunkWithEmptySlots();
+	Chunk* chunk = archetype->GetChunksArray()->GetCurrentChunk();
+	if (chunk!= NULL && (chunk->GetCount() < chunk->GetCapacity()))
+		return chunk;
+	else {
+		chunk = archetype->GetExistingChunkWithEmptySlots();
+		if (chunk != NULL) {
+			archetype->GetChunksArray()->Add(chunk);
+			return chunk;
+		}
+		else
+			return NULL;
+	}
 }
 
-ECS::Archetype ECS::EntityManager::GetOrCreateArchetypeWithTypes(std::initializer_list<ComponentType> types)
+ECS::Archetype* ECS::EntityManager::GetOrCreateArchetypeWithTypes(std::initializer_list<ComponentType> types)
 {
 	//check if archetype already exists
 	bool sameTypes = true;
@@ -17,39 +28,8 @@ ECS::Archetype ECS::EntityManager::GetOrCreateArchetypeWithTypes(std::initialize
 		sameTypes = archetypes[i].Compare(types);
 
 		if (sameTypes)
-			return archetypes[i];
+			return &archetypes[i];
 	}
-
-	Archetype archetype = Archetype(types);
-
-	//add to list of archetpes
-	if (countArchetypes == 0) {
-		this->archetypes = (Archetype*)malloc(sizeof(Archetype) * capacityInArchetypeArray);
-	}else if ((countArchetypes % capacityInArchetypeArray) == 0) {
-		Archetype* temp = (Archetype*)realloc(archetypes, sizeof(Archetype) * ((unsigned long long)capacityInArchetypeArray + countArchetypes));
-		if (temp != NULL)
-			this->archetypes = temp;
-	}  
-	
-	this->archetypes[countArchetypes++] = archetype;
-
-	return archetype;
-}
-
-ECS::Archetype ECS::EntityManager::GetOrCreateArchetypeWithTypes(std::list<ComponentType> types)
-{
-	//check if archetype already exists
-	bool sameTypes = true;
-	for (int i = 0; i < countArchetypes; i++) {
-		if (archetypes[i].GetTypesCount() != types.size()) continue;
-
-		sameTypes = archetypes[i].Compare(types);
-
-		if (sameTypes)
-			return archetypes[i];
-	}
-
-	Archetype archetype = Archetype(types);
 
 	//add to list of archetpes
 	if (countArchetypes == 0) {
@@ -61,22 +41,43 @@ ECS::Archetype ECS::EntityManager::GetOrCreateArchetypeWithTypes(std::list<Compo
 			this->archetypes = temp;
 	}
 
-	this->archetypes[countArchetypes++] = archetype;
+	Archetype arch = Archetype(types);
+	this->archetypes[countArchetypes++] = arch;
 
-	return archetype;
+	return &archetypes[countArchetypes-1];
 }
 
-EntityManager::EntityManager()
+ECS::Archetype* ECS::EntityManager::GetOrCreateArchetypeWithTypes(std::list<ComponentType> types)
 {
-	//EntityComponentStore.cs EnsureCapacity
-	archetypes = NULL;
-	countArchetypes = 0;
-	capacityInArchetypeArray = 10;
-	entitiesCapacity = 1000;
-	nextFreeEntityIndex = 0;
+	//check if archetype already exists
+	bool sameTypes = true;
+	for (int i = 0; i < countArchetypes; i++) {
+		if (archetypes[i].GetTypesCount() != types.size()) continue;
 
-	int value = 1000;
+		sameTypes = archetypes[i].Compare(types);
 
+		if (sameTypes)
+			return &archetypes[i];
+	}
+
+	//add to list of archetpes
+	if (countArchetypes == 0) {
+		this->archetypes = (Archetype*)malloc(sizeof(Archetype) * capacityInArchetypeArray);
+	}
+	else if ((countArchetypes % capacityInArchetypeArray) == 0) {
+		Archetype* temp = (Archetype*)realloc(archetypes, sizeof(Archetype) * ((unsigned long long)capacityInArchetypeArray + countArchetypes));
+		if (temp != NULL)
+			this->archetypes = temp;
+	}
+
+	Archetype arch = Archetype(types);
+	this->archetypes[countArchetypes++] = arch;;
+
+	return &this->archetypes[countArchetypes-1];
+}
+
+void ECS::EntityManager::IncreaseCapacity(int value)
+{
 	auto archetypeBytes = (value * sizeof(Archetype*) + 63) & ~63;
 	auto chunkDataBytes = (value * sizeof(EntityInChunk) + 63) & ~63;
 	auto bytesToAllocate = archetypeBytes + chunkDataBytes;
@@ -100,17 +101,28 @@ EntityManager::EntityManager()
 
 	entitiesCapacity = value;
 
-	//InitializeAdditionalCapacity(startNdx); impl ove metode ispod
+	//InitializeAdditionalCapacity(startNdx);
 
 	for (int i = startNdx; i != entitiesCapacity; i++)
 	{
-		entityInChunkByEntity[i].SetIndexInChunk(i + 1);
+		entityInChunkByEntity[i].SetIndexInChunk(i);
 		entityInChunkByEntity[i].SetChunk(NULL);
 	}
 
 	// Last entity indexInChunk identifies that we ran out of space...
 	entityInChunkByEntity[entitiesCapacity - 1].SetIndexInChunk(-1);
+}
 
+EntityManager::EntityManager()
+{
+	//EntityComponentStore.cs EnsureCapacity
+	archetypes = NULL;
+	countArchetypes = 0;
+	capacityInArchetypeArray = 10;
+	entitiesCapacity = 0;
+	nextFreeEntityIndex = 0;
+
+	IncreaseCapacity(1000);
 }
 
 EntityManager::~EntityManager()
@@ -129,63 +141,10 @@ EntityManager::~EntityManager()
 	entityInChunkByEntity = NULL;
 }
 
-template<class T>
-bool ECS::EntityManager::HasComponent(Entity entity)
-{
-	Archetype* archetype = archetypeByEntity[entity.GetID()];
-	return archetype->GetIndexInTypeArray(T) != -1;
-}
-
 bool ECS::EntityManager::HasComponent(Entity entity, ComponentType componentType)
 {
 	Archetype* archetype = archetypeByEntity[entity.GetID()];
 	return archetype->GetIndexInTypeArray(componentType) != -1;
-}
-
-template<class T>
-uint8_t* ECS::EntityManager::GetComponentPtr(Entity entity)
-{
-	Chunk* entityChunk = entityInChunkByEntity[entity.GetID()].GetChunk();
-	int entityIndexInChunk = entityInChunkByEntity[entity.GetID()].GetIndexInChunk();
-
-	Archetype* archetype = entityChunk->GetChunkArchetype();
-
-	int indexInTypeArray = archetype->GetIndexInTypeArray(T);
-
-	int offset = archetype->GetOffset(indexInTypeArray);
-	int sizeOf = archetype->GetSizeOf(indexInTypeArray);
-
-	return entityChunk->GetBuffer() + (offset + sizeOf * entityIndexInChunk);
-}
-
-template<class T>
-T EntityManager::GetComponent(Entity entity)
-{
-	if (!HasComponent<T>(entity))
-		return;
-	uint8_t* ptr = GetComponentPtr<T>(entity);
-
-	T value(*ptr);
-	//CopyPtrToStructure(ptr, out value);
-	return value;
-}
-
-template<class T>
-void ECS::EntityManager::SetComponent(Entity entity, T componentData)
-{
-	if (!HasComponent<T>(entity))
-		return;
-
-	uint8_t* ptr = GetComponentPtr<T>(entity);
-	componentData = *ptr;
-	//UnsafeUtility.CopyStructureToPtr(ref componentData, ptr);
-}
-
-
-template<class T>
-ComponentType ECS::EntityManager::Create()
-{
-	return ComponentType(typeid(T), sizeof(T));
 }
 
 int ECS::EntityManager::GetComponentCount(Entity entity)
@@ -200,11 +159,10 @@ bool ECS::EntityManager::AddComponent(Entity entity, ComponentType componentType
 	if (HasComponent(entity, componentType))
 		return false;
 
-	//Move(entity, dstChunk) ECSChanegArch.cs
-
 	Archetype* oldArchetype = archetypeByEntity[entity.GetID()];
 	Chunk* oldChunk = entityInChunkByEntity[entity.GetID()].GetChunk();
-	int oldIndexInChunk = entityInChunkByEntity[entity.GetID()].GetIndexInChunk();
+	int oldIndexInChunk = entityInChunkByEntity[entity.GetID()].GetIndexInChunk(); 
+	int lastIndexInOldChunk = oldChunk->GetCount() - 1;
 
 	std::list<ComponentType> newTypes;
 	ComponentType* oldTypes = oldArchetype->GetTypes();
@@ -213,8 +171,15 @@ bool ECS::EntityManager::AddComponent(Entity entity, ComponentType componentType
 	}
 	newTypes.push_back(componentType);
 
-	Archetype* newArchetype = &GetOrCreateArchetypeWithTypes(newTypes);
-    Chunk* newChunk = newArchetype->GetChunksArray()->GetCurrentChunk();
+	Archetype* newArchetype = GetOrCreateArchetypeWithTypes(newTypes);
+	newTypes.clear();
+
+	Chunk* newChunk = GetChunkWithEmptySlots(newArchetype);
+	if (newChunk == NULL) {
+		newChunk = Chunk::MallocChunk();
+		newChunk->Init(newArchetype);
+		newArchetype->AddToChunkList(newChunk);
+	}
 	int newIndexInChunk = newChunk->GetCount();
 
 	archetypeByEntity[entity.GetID()] = newArchetype;
@@ -224,35 +189,56 @@ bool ECS::EntityManager::AddComponent(Entity entity, ComponentType componentType
 	oldChunk->DecrementCount();
 
 	if (oldChunk->GetCount() == 0) {
-		oldArchetype->AddToChunkListWithEmptySlots(oldChunk);
+		oldArchetype->AddToChunkListWithEmptySlots(oldChunk); 
+		oldArchetype->GetChunksArray()->SetNull(oldChunk->GetId());
 	}
 
 	//copy to new chunk and delete from old
 	int newTypeIndex = componentType.GetIndex();
-	int newt = 1;
-	for (int t = 1; t != oldArchetype->GetTypesCount(); t++) {
+	int newt = 0;
+	bool cleanedNewComponentType = false;
+	for (int t = 0; t <= oldArchetype->GetTypesCount(); t++) {
 		int newOffset = newArchetype->GetOffset(newt);
 		int newSizeOf = newArchetype->GetSizeOf(newt);
 
-		int oldOffset = oldArchetype->GetOffset(t);
+		int oldOffset = oldArchetype->GetOffset(t); 
 		int oldSizeOf = oldArchetype->GetSizeOf(t);
-
-		int typeIndex = newArchetype->GetTypeInTypeArray(newt).GetIndex();
 
 		uint8_t* newDst = newChunk->GetBuffer() + (newOffset + (newSizeOf * newIndexInChunk));
 		uint8_t* oldDst = oldChunk->GetBuffer() + (oldOffset + (oldSizeOf * oldIndexInChunk));
-		if (typeIndex == newTypeIndex) {
+		uint8_t* lastEntityDst = oldChunk->GetBuffer() + (oldOffset + (oldSizeOf * lastIndexInOldChunk));
+
+		int typeIndex = -1;
+		if (t != 0) 
+			typeIndex = newArchetype->GetTypeInTypeArray(newt - 1).GetIndex();
+
+		if ((typeIndex != newTypeIndex) || t==0) {
 			memcpy(newDst, oldDst, newSizeOf); 
-			memset(oldDst, 0, oldSizeOf);
+			//copy last Enitity in chunk to positon of moved Entity
+			if (lastIndexInOldChunk != oldIndexInChunk) {
+				memcpy(oldDst, lastEntityDst, oldSizeOf);
+			}
+			memset(lastEntityDst, 0, oldSizeOf);
 		}
 		else {
 			memset(newDst, 0, newSizeOf);
+			cleanedNewComponentType = true;
 			t--;
 		}
 		newt++;
 	}
-	
+	if (!cleanedNewComponentType) {
+		int i = oldArchetype->GetTypesCount();
+		int newOffset = newArchetype->GetOffset(i);
+		int newSizeOf = newArchetype->GetSizeOf(i);
+		uint8_t* newDst = newChunk->GetBuffer() + (newOffset + (newSizeOf * newIndexInChunk));
+		memset(newDst, 0, newSizeOf);
+	}
 
+	//ako nije poslednji u izbacenom chunk moram prebaciti poslednji na njegovo mjesto haos
+	
+	oldArchetype->DecrementEntityCount();
+	newArchetype->IncerementEntityCount();
 	return true;
 }
 
@@ -264,6 +250,7 @@ bool ECS::EntityManager::RemoveComponent(Entity entity, ComponentType componentT
 	Archetype* oldArchetype = archetypeByEntity[entity.GetID()];
 	Chunk* oldChunk = entityInChunkByEntity[entity.GetID()].GetChunk();
 	int oldIndexInChunk = entityInChunkByEntity[entity.GetID()].GetIndexInChunk();
+	int lastIndexInOldChunk = oldChunk->GetCount() - 1;
 
 	std::list<ComponentType> newTypes;
 	ComponentType* oldTypes = oldArchetype->GetTypes();
@@ -272,8 +259,15 @@ bool ECS::EntityManager::RemoveComponent(Entity entity, ComponentType componentT
 		newTypes.push_back(oldTypes[i]);
 	}
 	
-	Archetype* newArchetype = &GetOrCreateArchetypeWithTypes(newTypes);
-	Chunk* newChunk = newArchetype->GetChunksArray()->GetCurrentChunk();
+	Archetype* newArchetype = GetOrCreateArchetypeWithTypes(newTypes);
+	newTypes.clear();
+
+	Chunk* newChunk = GetChunkWithEmptySlots(newArchetype);
+	if (newChunk == NULL) {
+		newChunk = Chunk::MallocChunk();
+		newChunk->Init(newArchetype);
+		newArchetype->AddToChunkList(newChunk);
+	}
 	int newIndexInChunk = newChunk->GetCount();
 
 	archetypeByEntity[entity.GetID()] = newArchetype;
@@ -284,38 +278,47 @@ bool ECS::EntityManager::RemoveComponent(Entity entity, ComponentType componentT
 
 	if (oldChunk->GetCount() == 0) {
 		oldArchetype->AddToChunkListWithEmptySlots(oldChunk);
+		oldArchetype->GetChunksArray()->SetNull(oldChunk->GetId());
 	}
 
-	//copy to new chunk and delete from old
-	int newTypeIndex = componentType.GetIndex();
-	int newt = 1;
-	for (int t = 1; t != oldArchetype->GetTypesCount(); t++) {
+	//copy to new chunk and delete from old; old have more types than new archetype
+	int newt = 0;
+	for (int t = 0; t != oldArchetype->GetTypesCount(); t++) {
 		int newOffset = newArchetype->GetOffset(newt);
 		int newSizeOf = newArchetype->GetSizeOf(newt);
 
 		int oldOffset = oldArchetype->GetOffset(t);
 		int oldSizeOf = oldArchetype->GetSizeOf(t);
 
-		int typeIndex = newArchetype->GetTypeInTypeArray(newt).GetIndex();
+		int newTypeIndex = newArchetype->GetTypeInTypeArray(newt - 1).GetIndex();
+		int oldTypeIndex = newArchetype->GetTypeInTypeArray(newt - 1).GetIndex();
 
 		uint8_t* newDst = newChunk->GetBuffer() + (newOffset + (newSizeOf * newIndexInChunk));
 		uint8_t* oldDst = oldChunk->GetBuffer() + (oldOffset + (oldSizeOf * oldIndexInChunk));
-		if (typeIndex == newTypeIndex) {
+		uint8_t* lastEntityDst = oldChunk->GetBuffer() + (oldOffset + (oldSizeOf * lastIndexInOldChunk));
+
+		if (oldTypeIndex == newTypeIndex) {
 			memcpy(newDst, oldDst, newSizeOf);
-			memset(oldDst, 0, oldSizeOf);
+			if (lastIndexInOldChunk != oldIndexInChunk) {
+				memcpy(oldDst, lastEntityDst, oldSizeOf);
+			}
+			memset(lastEntityDst, 0, oldSizeOf);
+			newt++;
 		}
 		else {
-			memset(newDst, 0, newSizeOf);
-			t--;
+			if (lastIndexInOldChunk != oldIndexInChunk) {
+				memcpy(oldDst, lastEntityDst, oldSizeOf);
+			}
+			memset(lastEntityDst, 0, oldSizeOf);
 		}
-		newt++;
 	}
 
-
+	oldArchetype->DecrementEntityCount();
+	newArchetype->IncerementEntityCount();
 	return true;
 }
 
-ECS::Archetype ECS::EntityManager::CreateArchetype(std::initializer_list<ComponentType> types)
+ECS::Archetype* ECS::EntityManager::CreateArchetype(std::initializer_list<ComponentType> types)
 {
 	return GetOrCreateArchetypeWithTypes(types);
 }
@@ -323,40 +326,28 @@ ECS::Archetype ECS::EntityManager::CreateArchetype(std::initializer_list<Compone
 Entity ECS::EntityManager::CreateEntity(std::initializer_list<ComponentType> types)
 {
 	int numberOfEntites = CountEntities();
-
-	if (archetypeByEntity == NULL) {
-		archetypeByEntity = (Archetype**)malloc(entitiesCapacity * sizeof(Archetype*));
-	}
-	else if (numberOfEntites != 0 && numberOfEntites % capacityInArchetypeArray == 0) {
-		archetypeByEntity = (Archetype**)realloc(archetypeByEntity, (numberOfEntites + entitiesCapacity) * sizeof(Archetype*));
+	
+	if (entitiesCapacity == numberOfEntites) {
+		IncreaseCapacity(entitiesCapacity + 1000);
 	}
 
-	if (entityInChunkByEntity == NULL) {
-		entityInChunkByEntity = (EntityInChunk*)malloc(entitiesCapacity * sizeof(EntityInChunk));
-	}
-	else if (numberOfEntites != 0 && numberOfEntites % entitiesCapacity == 0) {
-		entityInChunkByEntity = (EntityInChunk*)realloc(entityInChunkByEntity, (numberOfEntites + entitiesCapacity) * sizeof(EntityInChunk));
-	}
-
-	Archetype archetype = GetOrCreateArchetypeWithTypes(types);
+	Archetype* archetype = GetOrCreateArchetypeWithTypes(types);
 	Chunk* chunk = GetChunkWithEmptySlots(archetype);
 	if (chunk == NULL) {
 		chunk = Chunk::MallocChunk();
-		chunk->Init(&archetype);
-		archetype.AddToChunkList(chunk);
+		chunk->Init(archetype);
+		archetype->AddToChunkList(chunk);
 	}
 
-	Entity* entity = archetype.AllocateEntity(archetype.GetTypes());
+	Entity* entity = archetype->AllocateEntity(archetype->GetTypes());
 	entity->SetID(nextFreeEntityIndex);
 
-	archetypeByEntity[nextFreeEntityIndex] = &archetype;
+	archetypeByEntity[nextFreeEntityIndex] = archetype;
 	entityInChunkByEntity[nextFreeEntityIndex] = EntityInChunk();
 	entityInChunkByEntity[nextFreeEntityIndex].SetChunk(chunk);
-	entityInChunkByEntity[nextFreeEntityIndex].SetIndexInChunk(chunk->GetCount());
-	chunk->IncrementCount();
-	archetype.IncerementEntityCount();
+	entityInChunkByEntity[nextFreeEntityIndex].SetIndexInChunk(chunk->GetCount()-1);
 
-	nextFreeEntityIndex = numberOfEntites++;
+	nextFreeEntityIndex = numberOfEntites+1;
 
 	return *entity;
 }
@@ -371,12 +362,12 @@ void ECS::EntityManager::DestroyEntity(Entity entity)
 
 	//entity from last position switch to this free place
 	Chunk* currentChunk = archetype->GetChunksArray()->GetCurrentChunk();
-	int positionOfLastElement = currentChunk->GetCount();
-	int newPosition = entity.GetID();
+	int positionOfLastElement = currentChunk->GetCount()-1;
+	int newPosition = index;
 
 	currentChunk->DecrementCount();
 
-	for (int i = 1; i < archetype->GetTypesCount(); i++) {
+	for (int i = 0; i <= archetype->GetTypesCount(); i++) {
 		int offset = archetype->GetOffset(i);
 		int sizeOf = archetype->GetSizeOf(i);
 
@@ -389,18 +380,29 @@ void ECS::EntityManager::DestroyEntity(Entity entity)
 
 	if (currentChunk->GetCount() == 0) {
 		archetype->AddToChunkListWithEmptySlots(currentChunk);
+		archetype->GetChunksArray()->SetNull(currentChunk->GetId());
 	}
 
-
-	Entity* lastEntity = (Entity*)currentChunk->GetBuffer() + positionOfLastElement;
-
-	lastEntity->SetID(newPosition); // da li ovo treba
 	nextFreeEntityIndex--; //free index in entity array, da li je to dobar free index valjda jeste
 
 }
 
-void ECS::EntityManager::DestroyEntities(IComponent types[])
+void ECS::EntityManager::DestroyEntities(std::initializer_list<ComponentType> types)
 {
+	Archetype* archetype = GetOrCreateArchetypeWithTypes(types);
+	ArchetypeChunkArray* chunks  = archetype->GetChunksArray();
+	for (int chunkNum = 0; chunkNum < chunks->GetNumberOfChunks(); chunkNum++) {
+		Chunk* chunk = chunks->GetChunkByIndex(chunkNum);
+
+		chunk->SetCount(0);
+		uint8_t* dst = chunk->GetBuffer();
+		memset(dst, 0, chunk->GetChunkBufferSize());
+
+
+		archetype->AddToChunkListWithEmptySlots(chunk);
+		archetype->GetChunksArray()->SetNull(chunk->GetId());
+	}
+	archetype->SetCount(0);
 }
 
 int ECS::EntityManager::CountEntities()
@@ -430,4 +432,55 @@ std::vector<Entity> ECS::EntityManager::GetAllEntities()
 		}
 	}
 	return allEntites;
+}
+
+void ECS::EntityManager::SetArchetype(Entity entity, Archetype* newArchetype)
+{
+	Archetype* oldArchetype = archetypeByEntity[entity.GetID()];
+	Chunk* oldChunk = entityInChunkByEntity[entity.GetID()].GetChunk();
+	int oldIndexInChunk = entityInChunkByEntity[entity.GetID()].GetIndexInChunk();
+
+	Chunk* newChunk = GetChunkWithEmptySlots(newArchetype);
+	if (newChunk == NULL) {
+		newChunk = Chunk::MallocChunk();
+		newChunk->Init(newArchetype);
+		newArchetype->AddToChunkList(newChunk);
+	}
+	int newIndexInChunk = newChunk->GetCount();
+
+	archetypeByEntity[entity.GetID()] = newArchetype;
+	entityInChunkByEntity[entity.GetID()].SetChunk(newChunk);
+	entityInChunkByEntity[entity.GetID()].SetIndexInChunk(newIndexInChunk);
+	newChunk->IncrementCount();
+	oldChunk->DecrementCount();
+
+	if (oldChunk->GetCount() == 0) {
+		oldArchetype->AddToChunkListWithEmptySlots(oldChunk);
+		oldArchetype->GetChunksArray()->SetNull(oldChunk->GetId());
+	}
+
+	//copy to new chunk and delete from old
+	int newt = 1;
+	for (int t = 1; t != oldArchetype->GetTypesCount(); t++) {
+		int newOffset = newArchetype->GetOffset(newt);
+		int newSizeOf = newArchetype->GetSizeOf(newt);
+
+		int oldOffset = oldArchetype->GetOffset(t);
+		int oldSizeOf = oldArchetype->GetSizeOf(t);
+
+		int typeIndexNew = newArchetype->GetTypeInTypeArray(newt - 1).GetIndex();
+		int typeIndexOld = oldArchetype->GetTypeInTypeArray(t - 1).GetIndex();
+
+		uint8_t* newDst = newChunk->GetBuffer() + (newOffset + (newSizeOf * newIndexInChunk));
+		uint8_t* oldDst = oldChunk->GetBuffer() + (oldOffset + (oldSizeOf * oldIndexInChunk));
+		if (typeIndexNew == typeIndexOld) {
+			memcpy(newDst, oldDst, newSizeOf);
+			memset(oldDst, 0, oldSizeOf);
+		}
+		else {
+			memset(newDst, 0, newSizeOf); //ne moze ovako jer ne znam je li old ili new archetype ima vise tipova
+			t--;
+		}
+		newt++;
+	}
 }

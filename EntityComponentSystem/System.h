@@ -36,8 +36,8 @@ namespace ECS {
 		}
 
 		template<class Dependencie>
-		void AddDependencies(){
-			this->systemManagerInstance->AddSystemDependency(this, Dependencie);
+		void AddDependencies(Dependencie dependencie){
+			this->systemManagerInstance->AddSystemDependency(this, dependencie);
 		}
 
 		virtual void OnCreate() override {}

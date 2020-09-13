@@ -17,8 +17,10 @@ namespace ECS {
 		const int ChunkPtrCapacity = 10;
 	public:
 		ArchetypeChunkArray();
-
 		~ArchetypeChunkArray();
+		ArchetypeChunkArray(const ArchetypeChunkArray& oldArch);
+		ArchetypeChunkArray(ArchetypeChunkArray&& oldArch);
+		ArchetypeChunkArray& operator=(const ArchetypeChunkArray& oldArch);
 
 		int CalculateEntityCount();
 
@@ -33,9 +35,19 @@ namespace ECS {
 		}
 
 		Chunk* GetCurrentChunk() {
+			if (count == 0)
+				return NULL;
 			return chunks[count-1];
 		}
 
+		void SetNull(int id) {
+			for (int i = 0; i < count; i++)
+				if (chunks[i]->GetId() == id) {
+					chunks[i] = nullptr;
+					count--;
+				}
+
+		}
 	};
 
 }
