@@ -5,11 +5,15 @@ using namespace ECS;
 
 class EnamySystem : public System<EnamySystem> {
 private:
+	EntityManager* entityManager;
+	int numberOfEntites;
 
+	ComponentType movementComponent;
+	ComponentType enamyComponent;
+	ComponentType lifeTimeComponent;
 public:
-	virtual void OnCreate() override {}
-	virtual void OnDestroy() override {}
-	virtual void OnUpdate() override {}
+	void OnCreate() override;
+	void OnUpdate() override;
 
 
 };

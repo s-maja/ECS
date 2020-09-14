@@ -1,50 +1,39 @@
 #include "ECS.h"
 #include "MovementComponent.h"
-#include "Lifetime.h"
-#include "RotationComponent.h"
+#include "LifetimeComponent.h"
+#include "PlayerComponent.h"
+#include "EnamyComponent.h"
+#include "PlayerSystem.h"
+#include "EnamySystem.h"
 
 void Game1() {
+
     EntityManager* entityManager = ECS::ECS_Engine->GetEntityManager();
+    SystemManager* systemManager = ECS::ECS_Engine->GetSystemManager();
 
-    ComponentType movementComponent = entityManager->CreateComponentType<MovementComponent>();
+    ComponentType movementComponent = entityManager->CreateComponentType<Movement>();
     ComponentType lifeTimeComponent = entityManager->CreateComponentType<Lifetime>();
-    ComponentType rotationComponent = entityManager->CreateComponentType<RotationComponent>();
+    ComponentType playerComponent = entityManager->CreateComponentType<PlayerComponent>();
+    ComponentType enamyComponent = entityManager->CreateComponentType<EnamyComponent>();
 
+    cout << typeid(EntityManager).name();
 
-    Entity enamy1 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent });
-    Entity enamy2 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent });
-    Entity enamy3 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent });
+    Entity enamy1 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
+    Entity enamy2 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
+    Entity enamy3 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
 
-    Entity player1 = entityManager->CreateEntity({ movementComponent, rotationComponent });
+    Entity player1 = entityManager->CreateEntity({ movementComponent });
 
- 
+    
     bool has;
-    has = entityManager->HasComponent(player1, lifeTimeComponent);
-    cout << "Player has lifetime:" << has << endl;
-    has = entityManager->HasComponent<Lifetime>(player1);
-    cout << "Player has lifetime:" << has << endl;
-
-    //set component
-    MovementComponent m = MovementComponent();
-    m.speed = 9;
-    m.x = 5;
-    m.y = 7;
-    entityManager->SetComponent<MovementComponent>(enamy2, m);
-    //get component
-    entityManager->GetComponent<MovementComponent>(enamy2, &m);
-    cout << "Movement component:" << m.speed << " " << m.x << " " << m.y << endl;
+    has = entityManager->HasComponent(player1, playerComponent);
+    cout << "Player has playerComponent: " << has << endl;
 
 
-    //add component - probaj oba posebno pa oba zajedno AddComponent
-    entityManager->AddComponent(enamy2, rotationComponent);
-   // entityManager->AddComponent(player1, lifeTimeComponent); 
+    entityManager->AddComponent(player1, playerComponent);
 
-    has = entityManager->HasComponent<RotationComponent>(enamy2);
-    cout << "Player has rotation component:" << has << endl;
-
-    //get component
-    entityManager->GetComponent<MovementComponent>(enamy2, &m);
-    cout << "Movement component:" << m.speed << " " << m.x << " " << m.y << endl;
+    has = entityManager->HasComponent<PlayerComponent>(player1);
+    cout << "Player has playerComponent: " << has << endl;
 
     int numOfEntites = entityManager->CountEntities();
     std::vector<Entity> allEntites = entityManager->GetAllEntities();
@@ -52,27 +41,50 @@ void Game1() {
         cout << allEntites[i].GetID() << endl;
     }
 
-    //remove component
-    entityManager->RemoveComponent(player1, rotationComponent);
-    has = entityManager->HasComponent<RotationComponent>(player1);
-    cout << "Player has rotation component:" << has << endl;
-       
+    Entity testEntity = entityManager->CreateEntity({lifeTimeComponent, playerComponent, enamyComponent, movementComponent });
 
-    //destroy entity by enitty
-     entityManager->DestroyEntity(enamy2);
-    //destory entity by component
-    entityManager->DestroyEntities({ movementComponent, lifeTimeComponent });
+    has = entityManager->HasComponent<Lifetime>(testEntity);
+    cout << "Test entity has liftime component:" << has << endl;
+
+    entityManager->RemoveComponent(testEntity, lifeTimeComponent);
+
+    has = entityManager->HasComponent<Lifetime>(testEntity);
+    cout << "Test entity has liftime component:" << has << endl;
+
+   // entityManager->DestroyEntity(testEntity);
+    entityManager->DestroyEntities({ playerComponent, enamyComponent, movementComponent });
+
     numOfEntites = entityManager->CountEntities();
     allEntites = entityManager->GetAllEntities();
     for (int i = 0; i < numOfEntites; i++) {
         cout << allEntites[i].GetID() << endl;
     }
 
+    //set component
+   /* Movement m = Movement();
+    m.x = 5;
+    m.y = 7;
+    entityManager->SetComponent<Movement>(enamy2, m);
+    //get component
+    entityManager->GetComponent<Movement>(enamy2, &m);
+    cout << "Movement component:" << " " << m.x << " " << m.y << endl;
 
-    cout << "kraj" << endl;
+    //get component
+    entityManager->GetComponent<Movement>(enamy2, &m);
+    cout << "Movement component:" << " " << m.x << " " << m.y << endl;
 
-   
-    //set archetype
+    int count;
+    Movement** array = entityManager->GetComponentsWithType<Movement>(&count);
+    for (int i = 0; i < count; i++)
+        cout << array[i]->x << " "; */
+
+
+    cout << endl <<"kraj komponenti" << endl;
+
+    PlayerSystem* playerSystem  = (PlayerSystem*) systemManager->AddSystem<PlayerSystem>();
+    EnamySystem* enamySystem  = (EnamySystem*) systemManager->AddSystem<EnamySystem>();
+
+    cout << endl << "kraj sistema" << endl;
 }
 
 
@@ -82,6 +94,7 @@ int main() {
     ECS::Initialize();
 
     const float DELTA_TIME_STEP = 1.0f / 60.0f; // 60hz
+    ECS::timeStep = DELTA_TIME_STEP;
 
     bool bQuit = false;
 
@@ -95,6 +108,9 @@ int main() {
     {
         // Update all Systems
         ECS::ECS_Engine->Update(DELTA_TIME_STEP);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(60));
+
     }
 
     // destroy global 'Engine' object

@@ -12,6 +12,8 @@
 #include "EntityManager.h"
 #include "SystemManager.h"
 
+#include <thread>
+
 namespace ECS {
 
 

@@ -3,6 +3,7 @@
 using namespace ECS;
 
 Engine* ECS::ECS_Engine = nullptr; 
+float ECS::timeStep = 1.0f / 60.0f;
 
 void ECS::Initialize()
 {

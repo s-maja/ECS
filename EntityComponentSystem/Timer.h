@@ -42,12 +42,10 @@ namespace ECS {
 
 		void Reset();
 
-
 		inline TimeStamp GetTimeStamp() const
 		{
 			return TimeStamp(this->m_Elapsed.count());
 		}
-
 
 	};
 

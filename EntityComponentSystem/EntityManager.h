@@ -77,7 +77,14 @@ namespace ECS {
 		ComponentType CreateComponentType();
 
 		void SetArchetype(Entity entity, Archetype* archetype);
+
+		template<class T>
+		T** GetComponentsWithType(int* count);
 		
+		IComponent*** GetComponentsWithTypes(std::initializer_list<ComponentType> types, int* countComponents);
+
+		template<class T>
+		Entity** GetAllEntitiesWithType(int* count);
 	};
 
 	template<class T>
@@ -86,6 +93,50 @@ namespace ECS {
 		return ComponentType(typeid(t), sizeof(T));
 	}
 
+	template<class T>
+	inline T** EntityManager::GetComponentsWithType(int* count)
+	{
+		T** components = (T**)malloc(sizeof(T*)*1000); 
+		int iter = 0;
+		for (int i = 0; i < countArchetypes; i++) {
+			int index = archetypes[i].GetIndexInTypeArray<T>();
+			if (index == -1) continue;
+			ArchetypeChunkArray* chunks = archetypes[i].GetChunksArray();
+			for (int c = 0; c < chunks->GetNumberOfChunks(); c++) {
+				int offset = archetypes[i].GetOffset(index + 1); 
+				int sizeOf = archetypes[i].GetSizeOf(index + 1);
+				uint8_t* ptr = chunks->GetChunkByIndex(c)->GetBuffer()+ offset;
+
+				int numberOfEntites = chunks->GetChunkByIndex(c)->GetCount();
+				for (int j = 0; j < numberOfEntites; j++)
+					components[iter++] =(T*) ptr + j;
+			}
+		}
+
+		*count = iter;
+		return components;
+	}
+
+	template<class T>
+	inline Entity** EntityManager::GetAllEntitiesWithType(int* count)
+	{
+		Entity** entities = (Entity**)malloc(sizeof(Entity*) * 1000); ;
+		int iter = 0;
+		for (int i = 0; i < countArchetypes; i++) {
+			if (archetypes[i].GetIndexInTypeArray<T>() == -1) continue;
+
+			ArchetypeChunkArray* chunks = archetypes[i].GetChunksArray();
+			for (int c = 0; c < chunks->GetNumberOfChunks(); c++) {
+				uint8_t* ptr = chunks->GetChunkByIndex(c)->GetBuffer();
+
+				int numberOfEntites = chunks->GetChunkByIndex(c)->GetCount();
+				for (int j = 0; j < numberOfEntites; j++)
+					entities[iter++] = (Entity*)ptr + j;
+			}
+		}
+		*count = iter;
+		return entities;
+	}
 
 	template<class T>
 	inline bool ECS::EntityManager::HasComponent(Entity entity)

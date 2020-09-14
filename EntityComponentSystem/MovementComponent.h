@@ -3,9 +3,8 @@
 #include "ECS.h"
 using namespace ECS;
 
-class MovementComponent : public IComponent {
+class Movement : public IComponent {
 public:
-	int speed;
-	int x;
-	int y;
+	float x;
+	float y;
 };

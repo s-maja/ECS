@@ -1,2 +1,17 @@
-﻿  Main.cpp
+﻿  EnamySystem.cpp
+  Main.cpp
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(49,32): warning C4244: 'argument': conversion from 'const uint64_t' to 'const _Kty', possible loss of data
+          with
+          [
+              _Kty=int
+          ]
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\Main.cpp(84): message : see reference to function template instantiation 'ECS::ISystem *ECS::SystemManager::AddSystem<PlayerSystem>(void)' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(632): message : see reference to class template instantiation 'std::chrono::duration<double,std::ratio<1,1>>' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(178): message : see reference to class template instantiation 'std::chrono::duration<__int64,std::nano>' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(610): message : see reference to class template instantiation 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' being compiled
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(59,18): warning C4244: 'argument': conversion from 'const uint64_t' to 'const int', possible loss of data
+  PlayerSystem.cpp
+  Generating Code...
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(74): warning C4715: 'ECS::SystemManager::AddSystem<PlayerSystem>': not all control paths return a value
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(74): warning C4715: 'ECS::SystemManager::AddSystem<EnamySystem>': not all control paths return a value
   EntityComponentSystem.vcxproj -> C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\x64\Debug\EntityComponentSystem.exe

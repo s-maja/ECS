@@ -322,7 +322,7 @@ bool ECS::Archetype::Compare(std::initializer_list<ComponentType> componentTypes
 
 	bool sameTypes = true;
 	for (int i = 0; i < componentTypes.size(); i++) {
-		if (temp[i].GetIndex()  != (this->types[i]).GetIndex()) {
+		if (temp[i].GetTypeInfo()  != (this->types[i]).GetTypeInfo()) {
 			sameTypes = false;
 			break;
 		}
@@ -356,7 +356,7 @@ bool ECS::Archetype::Compare(std::list<ComponentType> componentTypes)
 
 	bool sameTypes = true;
 	for (int i = 0; i < componentTypes.size(); i++) {
-		if (temp[i].GetIndex() != (this->types[i]).GetIndex()) {
+		if (temp[i].GetTypeInfo() != (this->types[i]).GetTypeInfo()) {
 			sameTypes = false;
 			break;
 		}

@@ -3,7 +3,7 @@
 
 #include "SystemManager.h"
 #include "ISystem.h"
-#include "SystemTypeID.h"
+#include "TypeID.h"
 
 namespace ECS {
 
@@ -19,16 +19,16 @@ namespace ECS {
 
 	public:
 		System()  {
-			OnCreate();
 		}
 		virtual ~System(){
 			OnDestroy();
 		}
 
-		virtual inline const size_t GetStaticSystemTypeID() const
+		virtual inline const size_t GetSystemTypeID() const
 		{
 			return STATIC_SYSTEM_TYPE_ID;
 		}
+
 
 
 		void SetSystemManagerInstance(SystemManager* manager) {
@@ -48,7 +48,7 @@ namespace ECS {
 
 
 	template<class T>
-	const size_t System<T>::STATIC_SYSTEM_TYPE_ID = SystemTypeID<ISystem>::Get<T>();
+	const size_t System<T>::STATIC_SYSTEM_TYPE_ID = TypeID<ISystem>::Get<T>();
 	
 }
 

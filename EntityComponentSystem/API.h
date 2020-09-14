@@ -8,6 +8,7 @@ namespace ECS {
 	class Engine;
 
 	extern Engine* ECS_Engine;
+	extern float timeStep;
 
 	void Initialize();
 	void Terminate();

@@ -4,9 +4,7 @@
 #include <map>
 using namespace ECS;
 
-ECS::SystemManager::SystemManager()
-{
-}
+ECS::SystemManager::SystemManager() {}
 
 ECS::SystemManager::~SystemManager()
 {
@@ -30,95 +28,6 @@ void ECS::SystemManager::Update(float_t dt_ms)
 		{
 			system->OnUpdate();
 		}
-	}
-}
-
-template<class T>
-ISystem* SystemManager::AddSystem()
-{
-	const uint64_t STID = T::STATIC_SYSTEM_TYPE_ID;
-
-	// avoid multiple registrations of the same system
-	auto it = this->m_Systems.find(STID);
-	if ((it != this->m_Systems.end()) && (it->second != nullptr))
-		return (T*)it->second;
-
-
-	// create new system
-	T* system = new T();
-	if (system != nullptr)
-	{
-		system->SetSystemManagerInstance(this);
-		this->systems[STID] = system;
-	}
-
-	// resize dependency matrix
-	if (STID + 1 > this->m_SystemDependencyMatrix.size())
-	{
-		this->systemDependencyMatrix.resize(STID + 1);
-		for (int i = 0; i < this->systemDependencyMatrix.size(); ++i)
-			this->systemDependencyMatrix[i].resize(STID + 1);
-	}
-
-	// add to work list
-	this->m_SystemWorkOrder.push_back(system);
-
-}
-
-template<class System_, class Dependency_>
-void ECS::SystemManager::AddSystemDependency(System_ target, Dependency_ dependency)
-{
-	const int TARGET_ID = target->GetSystemTypeID();
-	const int DEPEND_ID = dependency->GetSystemTypeID();
-
-	if (this->systemDependencyMatrix[TARGET_ID][DEPEND_ID] != true)
-	{
-		this->systemDependencyMatrix[TARGET_ID][DEPEND_ID] = true;
-	}
-
-	this->UpdateSystemWorkOrder();
-}
-
-template<class T>
-T* ECS::SystemManager::GetSystem() const
-{
-	auto it = this->systems.find(T::STATIC_SYSTEM_TYPE_ID);
-
-	return it != this->systems.end() ? (T*)it->second : nullptr;
-}
-
-template<class T>
-void ECS::SystemManager::EnableSystem()
-{
-
-	const size_t STID = T::STATIC_SYSTEM_TYPE_ID;
-
-	// get system
-	auto it = this->systems.find(STID);
-	if (it != this->systems.end())
-	{
-		if (it->second->IsEnabled() == true)
-			return;
-
-		// enable system
-		it->second->Enable();
-	}
-}
-
-template<class T>
-void ECS::SystemManager::DisableSystem()
-{
-	const size_t STID = T::STATIC_SYSTEM_TYPE_ID;
-
-	// get system
-	auto it = this->systems.find(STID);
-	if (it != this->systems.end())
-	{
-		if (it->second->IsEnabled() == false)
-			return;
-
-		// enable system
-		it->second->Disable();
 	}
 }
 

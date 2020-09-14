@@ -8,34 +8,29 @@ using namespace std;
 
 namespace ECS {
 
-	class ComponentType {
-	private:
-		static int INDEX;
-		int index;
+	class ComponentType  {
+	public:
 		int size;
 		const type_info* type;
+		static int INDEX;
+		int index;
 	public:
 		ComponentType() {}
 
 		ComponentType(const type_info& type, int size) {
 			this->size = size;
-			index = INDEX++;
 			this->type = &type;
+			this->index = INDEX++;
 		}
 
 		ComponentType& operator=(const ComponentType& compType) {
 			if (this != &compType) {
-				index = compType.index;
 				size = compType.size;
 				type = compType.type;
+				index = compType.index;
 			}
 			return *this;
 		}
-
-		int GetIndex() {
-			return index;
-		}
-
 		int GetSize() {
 			return size;
 		}
@@ -43,10 +38,11 @@ namespace ECS {
 		const type_info& GetTypeInfo() {
 			return *type;
 		}
+		const int GetIndex() {
+			return index;
+		}
 		
 	};
 
-	
-
-};
+}
 #endif // !_COMPONENT_TYPE_
