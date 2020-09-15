@@ -153,6 +153,7 @@
     <ClInclude Include="IComponent.h" />
     <ClInclude Include="ISystem.h" />
     <ClInclude Include="LifetimeComponent.h" />
+    <ClInclude Include="LifetimeSystem.h" />
     <ClInclude Include="MovementComponent.h" />
     <ClInclude Include="PlayerComponent.h" />
     <ClInclude Include="PlayerSystem.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="ISystem.cpp" />
+    <ClCompile Include="LifetimeSystem.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PlayerSystem.cpp" />
     <ClCompile Include="SystemManager.cpp" />

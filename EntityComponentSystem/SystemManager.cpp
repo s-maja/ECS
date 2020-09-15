@@ -20,6 +20,19 @@ ECS::SystemManager::~SystemManager()
 
 }
 
+void ECS::SystemManager::AddSystemDependency(ISystem* target, ISystem* dependency)
+{
+	const int TARGET_ID = target->GetSystemTypeID();
+	const int DEPEND_ID = dependency->GetSystemTypeID();
+
+	if (this->systemDependencyMatrix[TARGET_ID][DEPEND_ID] != true)
+	{
+		this->systemDependencyMatrix[TARGET_ID][DEPEND_ID] = true;
+	}
+
+	this->UpdateSystemWorkOrder();
+}
+
 void ECS::SystemManager::Update(float_t dt_ms)
 {
 	for (ISystem* system : this->systemWorkOrder)

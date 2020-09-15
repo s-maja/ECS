@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Example of usage source">
       <UniqueIdentifier>{852f51cb-3f95-4cdd-a18d-fab1ef17d929}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Preformance tests">
+      <UniqueIdentifier>{67d85763-84c5-472a-b25a-21a15e510662}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -48,9 +51,6 @@
     <ClCompile Include="Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files\Example of usage source</Filter>
-    </ClCompile>
     <ClCompile Include="TypeID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -61,6 +61,12 @@
       <Filter>Source Files\Example of usage source</Filter>
     </ClCompile>
     <ClCompile Include="EnamySystem.cpp">
+      <Filter>Source Files\Example of usage source</Filter>
+    </ClCompile>
+    <ClCompile Include="LifetimeSystem.cpp">
+      <Filter>Source Files\Example of usage source</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files\Example of usage source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -129,6 +135,9 @@
       <Filter>Header Files\Example of usage headers</Filter>
     </ClInclude>
     <ClInclude Include="PlayerComponent.h">
+      <Filter>Header Files\Example of usage headers</Filter>
+    </ClInclude>
+    <ClInclude Include="LifetimeSystem.h">
       <Filter>Header Files\Example of usage headers</Filter>
     </ClInclude>
   </ItemGroup>

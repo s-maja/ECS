@@ -5,6 +5,7 @@
 #include "EnamyComponent.h"
 #include "PlayerSystem.h"
 #include "EnamySystem.h"
+#include "LifetimeSystem.h"
 
 void Game1() {
 
@@ -16,15 +17,12 @@ void Game1() {
     ComponentType playerComponent = entityManager->CreateComponentType<PlayerComponent>();
     ComponentType enamyComponent = entityManager->CreateComponentType<EnamyComponent>();
 
-    cout << typeid(EntityManager).name();
-
     Entity enamy1 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
     Entity enamy2 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
     Entity enamy3 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
 
     Entity player1 = entityManager->CreateEntity({ movementComponent });
 
-    
     bool has;
     has = entityManager->HasComponent(player1, playerComponent);
     cout << "Player has playerComponent: " << has << endl;
@@ -41,7 +39,7 @@ void Game1() {
         cout << allEntites[i].GetID() << endl;
     }
 
-    Entity testEntity = entityManager->CreateEntity({lifeTimeComponent, playerComponent, enamyComponent, movementComponent });
+    Entity testEntity = entityManager->CreateEntity({ lifeTimeComponent, playerComponent, enamyComponent, movementComponent });
 
     has = entityManager->HasComponent<Lifetime>(testEntity);
     cout << "Test entity has liftime component:" << has << endl;
@@ -51,7 +49,7 @@ void Game1() {
     has = entityManager->HasComponent<Lifetime>(testEntity);
     cout << "Test entity has liftime component:" << has << endl;
 
-   // entityManager->DestroyEntity(testEntity);
+    // entityManager->DestroyEntity(testEntity);
     entityManager->DestroyEntities({ playerComponent, enamyComponent, movementComponent });
 
     numOfEntites = entityManager->CountEntities();
@@ -60,34 +58,15 @@ void Game1() {
         cout << allEntites[i].GetID() << endl;
     }
 
-    //set component
-   /* Movement m = Movement();
-    m.x = 5;
-    m.y = 7;
-    entityManager->SetComponent<Movement>(enamy2, m);
-    //get component
-    entityManager->GetComponent<Movement>(enamy2, &m);
-    cout << "Movement component:" << " " << m.x << " " << m.y << endl;
+    cout << endl << "kraj komponenti" << endl;
 
-    //get component
-    entityManager->GetComponent<Movement>(enamy2, &m);
-    cout << "Movement component:" << " " << m.x << " " << m.y << endl;
+    PlayerSystem* playerSystem = (PlayerSystem*)systemManager->AddSystem<PlayerSystem>();
+    EnamySystem* enamySystem = (EnamySystem*)systemManager->AddSystem<EnamySystem>();
+    LifetimeSystem* lifetimeSystem = (LifetimeSystem*)systemManager->AddSystem<LifetimeSystem>();
 
-    int count;
-    Movement** array = entityManager->GetComponentsWithType<Movement>(&count);
-    for (int i = 0; i < count; i++)
-        cout << array[i]->x << " "; */
+    systemManager->AddSystemDependency(lifetimeSystem, enamySystem);
 
-
-    cout << endl <<"kraj komponenti" << endl;
-
-    PlayerSystem* playerSystem  = (PlayerSystem*) systemManager->AddSystem<PlayerSystem>();
-    EnamySystem* enamySystem  = (EnamySystem*) systemManager->AddSystem<EnamySystem>();
-
-    cout << endl << "kraj sistema" << endl;
 }
-
-
 
 int main() {
     // initialize global 'Engine' object

@@ -485,12 +485,12 @@ void ECS::EntityManager::SetArchetype(Entity entity, Archetype* newArchetype)
 	}
 }
 
-IComponent*** ECS::EntityManager::GetComponentsWithTypes(std::initializer_list<ComponentType> types,int* countComponents)
+uint8_t*** ECS::EntityManager::GetComponentsWithTypes(std::initializer_list<ComponentType> types,int* countComponents)
 {
 	int numOfComponentTypes = types.size();
-	IComponent*** components = (IComponent***)malloc(sizeof(IComponent**) * numOfComponentTypes);
+	uint8_t*** components = (uint8_t***)malloc(sizeof(uint8_t**) * numOfComponentTypes);
 	for (int i = 0; i < numOfComponentTypes; i++)
-		components[i] = (IComponent**)malloc(sizeof(IComponent*) * 1000);
+		components[i] = (uint8_t**)malloc(sizeof(uint8_t*) * 1000);
 
 	int iter = 0;
 	for (int i = 0; i < countArchetypes; i++) {
@@ -514,12 +514,12 @@ IComponent*** ECS::EntityManager::GetComponentsWithTypes(std::initializer_list<C
 				int index = archetypes[i].GetIndexInTypeArray(*it);
 				int offset = archetypes[i].GetOffset(index + 1);
 				int sizeOf = archetypes[i].GetSizeOf(index + 1);
-				uint8_t* ptr = chunks->GetChunkByIndex(c)->GetBuffer() + offset;
+				uint8_t* ptr = chunks->GetChunkByIndex(c)->GetBuffer();
 
 				int numberOfEntites = chunks->GetChunkByIndex(c)->GetCount();
 				currentIter = iter;
 				for (int j = 0; j < numberOfEntites; j++)
-					components[component][currentIter++] = (IComponent*)ptr + j;
+					components[component][currentIter++] = ptr + (offset + sizeOf*j);
 				component++;
 			}
 			iter += currentIter;

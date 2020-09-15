@@ -18,13 +18,13 @@ void EnamySystem::OnCreate()
         m.y = 97;
         entityManager->SetComponent(*entities[i], m);
         Lifetime l = Lifetime();
-        l.time = 5000;
+        l.time = 3;
         entityManager->SetComponent(*entities[i], l);
         EnamyComponent e = EnamyComponent();
         e.x1 = 0; e.y1 = 0;
         e.x2 = 5; e.y2 = 5;
         e.tempPatrolTime = 0;
-        e.patrolTime = 1000;
+        e.patrolTime = 3;
         entityManager->SetComponent(*entities[i], e);
     }
 
@@ -33,8 +33,10 @@ void EnamySystem::OnCreate()
 
 void EnamySystem::OnUpdate()
 {
+
+   // cout << "Enamy System " << endl;
     std::initializer_list<ComponentType> types = { movementComponent, lifeTimeComponent, enamyComponent };
-    IComponent*** enamyComponents = entityManager->GetComponentsWithTypes(types, &numberOfEntites);
+    uint8_t*** enamyComponents = entityManager->GetComponentsWithTypes(types, &numberOfEntites);
 
     for (int i = 0; i < numberOfEntites; i++)
     {
@@ -52,11 +54,10 @@ void EnamySystem::OnUpdate()
                 m->x = e->x1;
                 m->y = e->y1;
             }
-
-           // cout << m->x << " ";
         }
+      
 
         e->tempPatrolTime += ECS::timeStep;
-        l->time += ECS::timeStep;
-    }
+        l->time -= ECS::timeStep;
+;    }
 }

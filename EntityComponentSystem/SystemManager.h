@@ -22,8 +22,7 @@ namespace ECS {
 		template<class T>
 		ISystem* AddSystem();
 
-		template<class System_, class Dependency_>
-		void AddSystemDependency(System_ target, Dependency_ dependency);
+		void AddSystemDependency(ISystem* target, ISystem* dependency);
 
 		template<class T>
 		T* GetSystem() const;
@@ -71,20 +70,7 @@ namespace ECS {
 		// add to work list
 		this->systemWorkOrder.push_back(system);
 
-	}
-
-	template<class System_, class Dependency_>
-	inline void ECS::SystemManager::AddSystemDependency(System_ target, Dependency_ dependency)
-	{
-		const int TARGET_ID = target->GetSystemTypeID();
-		const int DEPEND_ID = dependency->GetSystemTypeID();
-
-		if (this->systemDependencyMatrix[TARGET_ID][DEPEND_ID] != true)
-		{
-			this->systemDependencyMatrix[TARGET_ID][DEPEND_ID] = true;
-		}
-
-		this->UpdateSystemWorkOrder();
+		return system;
 	}
 
 	template<class T>

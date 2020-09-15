@@ -81,7 +81,7 @@ namespace ECS {
 		template<class T>
 		T** GetComponentsWithType(int* count);
 		
-		IComponent*** GetComponentsWithTypes(std::initializer_list<ComponentType> types, int* countComponents);
+		uint8_t*** GetComponentsWithTypes(std::initializer_list<ComponentType> types, int* countComponents);
 
 		template<class T>
 		Entity** GetAllEntitiesWithType(int* count);
@@ -126,12 +126,14 @@ namespace ECS {
 			if (archetypes[i].GetIndexInTypeArray<T>() == -1) continue;
 
 			ArchetypeChunkArray* chunks = archetypes[i].GetChunksArray();
+			int sizeOf = archetypes[i].GetSizeOf(0);
+
 			for (int c = 0; c < chunks->GetNumberOfChunks(); c++) {
 				uint8_t* ptr = chunks->GetChunkByIndex(c)->GetBuffer();
 
 				int numberOfEntites = chunks->GetChunkByIndex(c)->GetCount();
 				for (int j = 0; j < numberOfEntites; j++)
-					entities[iter++] = (Entity*)ptr + j;
+					entities[iter++] = (Entity*)(ptr + j*sizeOf);
 			}
 		}
 		*count = iter;
@@ -165,7 +167,6 @@ namespace ECS {
 
 		uint8_t* ptr = GetComponentPtr<T>(entity);
 		memcpy(ptr, &componentData, sizeof(T));
-		//UnsafeUtility.CopyStructureToPtr(ref componentData, ptr);
 	}
 
 	template<class T>
@@ -178,8 +179,8 @@ namespace ECS {
 
 		int indexInTypeArray = archetype->GetIndexInTypeArray<T>();
 
-		int offset = archetype->GetOffset(indexInTypeArray+1); //index in type array starts at 0, but first compoenents starts at 1
-		int sizeOf = archetype->GetSizeOf(indexInTypeArray+1);
+		int offset = archetype->GetOffset(indexInTypeArray + 1); //index in type array starts at 0, but first compoenents starts at 1
+		int sizeOf = archetype->GetSizeOf(indexInTypeArray + 1);
 
 		return entityChunk->GetBuffer() + (offset + sizeOf * entityIndexInChunk);
 	}

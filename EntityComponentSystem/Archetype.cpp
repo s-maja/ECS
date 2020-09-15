@@ -4,7 +4,7 @@ using namespace ECS;
 int ECS::Archetype::CalculateChunkCapacity(int bufferSize, int* componentSizes, int count)
 {
 	int totalSize = 0;
-	for (int i = 0; i < count; ++i)
+	for (int i = 0; i <= count; ++i)
 		totalSize += componentSizes[i];
 
 	int capacity = bufferSize / totalSize; //The amount of available space in a chunk : size of components for 1 entity
@@ -69,8 +69,10 @@ ECS::Archetype::Archetype(std::initializer_list<ComponentType> componentTypes)
 	
 	this->chunkCapacity = CalculateChunkCapacity(Chunk::GetChunkBufferSize(), sizeOfs, count);
 
-	for (int i = 1; i <= count; i++)
-		this->offsets[i] = Align(this->chunkCapacity * sizeOfs[i-1], 64);
+	for (int i = 1; i <= count; i++) {
+		int prevOffset = this->offsets[i - 1];
+		this->offsets[i] = prevOffset +  Align(this->chunkCapacity * sizeOfs[i - 1], 64);
+	}
 }
 
 ECS::Archetype::Archetype(std::list<ComponentType> componentTypes)
@@ -116,8 +118,10 @@ ECS::Archetype::Archetype(std::list<ComponentType> componentTypes)
 
 	this->chunkCapacity = CalculateChunkCapacity(Chunk::GetChunkBufferSize(), sizeOfs, count);
 
-	for (int i = 1; i <= count; i++)
-		this->offsets[i] = Align(this->chunkCapacity * sizeOfs[i-1], 64);
+	for (int i = 1; i <= count; i++) {
+		int prevOffset = this->offsets[i - 1];
+		this->offsets[i] = prevOffset + Align(this->chunkCapacity * sizeOfs[i - 1], 64);
+	}
 }
 
 ECS::Archetype::Archetype(Archetype&& oldArch)
