@@ -29,8 +29,6 @@ namespace ECS {
 			return STATIC_SYSTEM_TYPE_ID;
 		}
 
-
-
 		void SetSystemManagerInstance(SystemManager* manager) {
 			systemManagerInstance = manager;
 		}
@@ -45,7 +43,6 @@ namespace ECS {
 		virtual void OnUpdate() override {}
 
 	}; 
-
 
 	template<class T>
 	const size_t System<T>::STATIC_SYSTEM_TYPE_ID = TypeID<ISystem>::Get<T>();

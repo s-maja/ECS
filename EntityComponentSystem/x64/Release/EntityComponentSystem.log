@@ -1,0 +1,17 @@
+﻿  Main.cpp
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(48,32): warning C4244: 'argument': conversion from 'const uint64_t' to 'const _Kty', possible loss of data
+          with
+          [
+              _Kty=int
+          ]
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\Main.cpp(66): message : see reference to function template instantiation 'ECS::ISystem *ECS::SystemManager::AddSystem<PlayerSystem>(void)' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(632): message : see reference to class template instantiation 'std::chrono::duration<double,std::ratio<1,1>>' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(178): message : see reference to class template instantiation 'std::chrono::duration<__int64,std::nano>' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(610): message : see reference to class template instantiation 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' being compiled
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(58,18): warning C4244: 'argument': conversion from 'const uint64_t' to 'const int', possible loss of data
+  Generating code
+  733 of 959 functions (76.4%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    14 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  EntityComponentSystem.vcxproj -> C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\x64\Release\EntityComponentSystem.exe

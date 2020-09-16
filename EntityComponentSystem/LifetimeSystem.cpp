@@ -1,14 +1,8 @@
 #include "LifetimeSystem.h"
 #include "LifetimeComponent.h"
 
-void LifetimeSystem::OnCreate()
-{
-}
-
 void LifetimeSystem::OnUpdate()
 {
-
-   // cout << "Lifetime System " << endl;
     entityManager = ECS::ECS_Engine->GetEntityManager();
 
     Entity** entities = entityManager->GetAllEntitiesWithType<Lifetime>(&numberOfEntites);

@@ -107,16 +107,6 @@ namespace ECS {
 
 		bool Compare(std::list<ComponentType> componentTypes);
 	
-		string toString()
-		{
-			string info = "";
-			for (int i = 0; i < typesCount; i++)
-			{
-				//info += " " + types[i].toString();
-			}
-
-			return info;
-		}
 	};
 
 	template<class T>

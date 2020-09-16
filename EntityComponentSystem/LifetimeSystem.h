@@ -9,7 +9,6 @@ private:
 	int numberOfEntites;
 
 public:
-	void OnCreate() override;
 	void OnUpdate() override;
 
 };

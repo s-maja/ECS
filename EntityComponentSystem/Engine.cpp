@@ -25,8 +25,5 @@ void ECS::Engine::Update(float tick_ms)
 
 	// Update all running systems
 	systemManager->Update(tick_ms);
-
-	// Finalize pending destroyed entities
-	//entityManager->RemoveDestroyedEntities(); :TODO
 }
 

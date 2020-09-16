@@ -1,17 +1,16 @@
-#include "EnamySystem.h"
-#include "EnamyComponent.h"
+#include "EnemySystem.h"
+#include "EnemyComponent.h"
 #include "MovementComponent.h"
 #include "LifetimeComponent.h"
 
-void EnamySystem::OnCreate()
+void EnemySystem::OnCreate()
 {
     entityManager = ECS::ECS_Engine->GetEntityManager();
     movementComponent = entityManager->CreateComponentType<Movement>();
     lifeTimeComponent = entityManager->CreateComponentType<Lifetime>();
-    enamyComponent = entityManager->CreateComponentType<EnamyComponent>();
+    enamyComponent = entityManager->CreateComponentType<EnemyComponent>();
 
-    //get all entities with enamy component and set same start compoonent data
-    Entity** entities = entityManager->GetAllEntitiesWithType<EnamyComponent>(&numberOfEntites);
+    Entity** entities = entityManager->GetAllEntitiesWithType<EnemyComponent>(&numberOfEntites);
     for (int i = 0; i < numberOfEntites; i++) {
         Movement m = Movement();
         m.x = 99;
@@ -20,29 +19,26 @@ void EnamySystem::OnCreate()
         Lifetime l = Lifetime();
         l.time = 3;
         entityManager->SetComponent(*entities[i], l);
-        EnamyComponent e = EnamyComponent();
+        EnemyComponent e = EnemyComponent();
         e.x1 = 0; e.y1 = 0;
         e.x2 = 5; e.y2 = 5;
         e.tempPatrolTime = 0;
         e.patrolTime = 3;
         entityManager->SetComponent(*entities[i], e);
     }
-
-    //mozda da ih postavim na null 
 }
 
-void EnamySystem::OnUpdate()
+void EnemySystem::OnUpdate()
 {
-
    // cout << "Enamy System " << endl;
     std::initializer_list<ComponentType> types = { movementComponent, lifeTimeComponent, enamyComponent };
-    uint8_t*** enamyComponents = entityManager->GetComponentsWithTypes(types, &numberOfEntites);
+    uint8_t*** enemyComponents = entityManager->GetComponentsWithTypes(types, &numberOfEntites);
 
     for (int i = 0; i < numberOfEntites; i++)
     {
-        Movement* m = (Movement*)enamyComponents[0][i];
-        Lifetime* l = (Lifetime*)enamyComponents[1][i];
-        EnamyComponent* e = (EnamyComponent*)enamyComponents[2][i];
+        Movement* m = (Movement*)enemyComponents[0][i];
+        Lifetime* l = (Lifetime*)enemyComponents[1][i];
+        EnemyComponent* e = (EnemyComponent*)enemyComponents[2][i];
 
         if (e->patrolTime <= e->tempPatrolTime) {
             e->tempPatrolTime = 0;
@@ -59,5 +55,5 @@ void EnamySystem::OnUpdate()
 
         e->tempPatrolTime += ECS::timeStep;
         l->time -= ECS::timeStep;
-;    }
+    }
 }

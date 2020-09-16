@@ -18,6 +18,4 @@ void ECS::Terminate()
 		delete ECS_Engine;
 		ECS_Engine = nullptr;
 	}
-
-	// check for memory leaks
 }

@@ -261,11 +261,7 @@ void ECS::Archetype::AddToChunkList(Chunk* chunk)
 
 Entity* ECS::Archetype::AllocateEntity(ComponentType* types)
 {
-	//ChunkDataUtiliy.cs
-	//int AllocateIntoChunk(Chunk * chunk, int count, out int outIndex);
 	int allocatedIndex = this->entityCount % chunkCapacity;
-	//EntityComponentStoreChunk.cs
-	//void AllocateEntities(Archetype * arch, Chunk * chunk, int baseIndex, int count, Entity * outputEntities);
 	Entity* entityInChunkStart = (Entity*)chunks->GetCurrentChunk()->GetBuffer() + allocatedIndex;
 	this->entityCount++;
 	chunks->GetCurrentChunk()->IncrementCount();

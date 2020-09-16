@@ -119,9 +119,6 @@
     <ClInclude Include="PlayerSystem.h">
       <Filter>Header Files\Example of usage headers</Filter>
     </ClInclude>
-    <ClInclude Include="EnamySystem.h">
-      <Filter>Header Files\Example of usage headers</Filter>
-    </ClInclude>
     <ClInclude Include="TypeID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -131,14 +128,20 @@
     <ClInclude Include="MovementComponent.h">
       <Filter>Header Files\Example of usage headers</Filter>
     </ClInclude>
-    <ClInclude Include="EnamyComponent.h">
-      <Filter>Header Files\Example of usage headers</Filter>
-    </ClInclude>
     <ClInclude Include="PlayerComponent.h">
       <Filter>Header Files\Example of usage headers</Filter>
     </ClInclude>
     <ClInclude Include="LifetimeSystem.h">
       <Filter>Header Files\Example of usage headers</Filter>
     </ClInclude>
+    <ClInclude Include="EnemyComponent.h">
+      <Filter>Header Files\Example of usage headers</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemySystem.h">
+      <Filter>Header Files\Example of usage headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

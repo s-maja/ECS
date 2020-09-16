@@ -101,8 +101,6 @@ void ECS::EntityManager::IncreaseCapacity(int value)
 
 	entitiesCapacity = value;
 
-	//InitializeAdditionalCapacity(startNdx);
-
 	for (int i = startNdx; i != entitiesCapacity; i++)
 	{
 		entityInChunkByEntity[i].SetIndexInChunk(i);
@@ -115,7 +113,6 @@ void ECS::EntityManager::IncreaseCapacity(int value)
 
 EntityManager::EntityManager()
 {
-	//EntityComponentStore.cs EnsureCapacity
 	archetypes = NULL;
 	countArchetypes = 0;
 	capacityInArchetypeArray = 10;
@@ -127,13 +124,14 @@ EntityManager::EntityManager()
 
 EntityManager::~EntityManager()
 {
-	free(archetypes);
-	free(entityInChunkByEntity);
+	if(archetypes!= NULL )free(archetypes);
 	
-	for (int i = 0; i < countArchetypes; i++)
-		free(archetypeByEntity[i]);
-
+	for (int i = 0; i < countArchetypes; i++);
+		//free(archetypeByEntity[i]);
 	free(archetypeByEntity);
+
+	if (entityInChunkByEntity != NULL)
+		entityInChunkByEntity = NULL;
 
 	archetypes = NULL;
 	countArchetypes = 0;
@@ -155,7 +153,6 @@ int ECS::EntityManager::GetComponentCount(Entity entity)
 
 bool ECS::EntityManager::AddComponent(Entity entity, ComponentType componentType)
 {
-	//EnityDataAccess.cs
 	if (HasComponent(entity, componentType))
 		return false;
 
@@ -234,8 +231,6 @@ bool ECS::EntityManager::AddComponent(Entity entity, ComponentType componentType
 		uint8_t* newDst = newChunk->GetBuffer() + (newOffset + (newSizeOf * newIndexInChunk));
 		memset(newDst, 0, newSizeOf);
 	}
-
-	//ako nije poslednji u izbacenom chunk moram prebaciti poslednji na njegovo mjesto haos
 	
 	oldArchetype->DecrementEntityCount();
 	newArchetype->IncerementEntityCount();

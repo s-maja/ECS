@@ -10,7 +10,7 @@
 
 namespace ECS {
 
-	// The EntityManager manages entities and components in a World.
+	// The EntityManager manages entities and components
 	// The EntityManager provides an API to create, read, update, and destroy entities.
 
 	class EntityManager {
@@ -61,7 +61,6 @@ namespace ECS {
 		// The EntityManager creates the entity in the first available chunk with the matching archetype that has enough space.
 		Entity CreateEntity(std::initializer_list<ComponentType> types);
 
-		////get last entity from last chunk in that archetype and put on that place 
 		// Destroys an entity.
 		void DestroyEntity(Entity entity);
 
@@ -96,7 +95,7 @@ namespace ECS {
 	template<class T>
 	inline T** EntityManager::GetComponentsWithType(int* count)
 	{
-		T** components = (T**)malloc(sizeof(T*)*1000); 
+		T** components = (T**)malloc(sizeof(T*)*700000); 
 		int iter = 0;
 		for (int i = 0; i < countArchetypes; i++) {
 			int index = archetypes[i].GetIndexInTypeArray<T>();

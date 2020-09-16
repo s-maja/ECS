@@ -17,18 +17,16 @@ void PlayerSystem::OnCreate()
         Movement m = Movement();
         m.x = 0;
         m.y = 0;
-        entityManager->SetComponent(*entities[i], m);
+        entityManager->SetComponent(*entities[i], m); //init all components of entities
        
         PlayerComponent p = PlayerComponent();
         p.speed = 10;
         entityManager->SetComponent(*entities[i], p);
     }
-
 }
 
 void PlayerSystem::OnUpdate()
 {
-   // cout << "Player System " << endl;
     std::initializer_list<ComponentType> types = { movementComponent, playerComponent };
     uint8_t*** playerComponents = entityManager->GetComponentsWithTypes(types, &numberOfEntites);
 

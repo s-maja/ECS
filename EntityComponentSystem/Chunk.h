@@ -14,9 +14,6 @@ namespace ECS {
 	class IComponent;
 	class ComponentType;
 
-	//svaki chunk ima archetype i kapacitet mu je kapacitet tog archetype 
-	//metoda u ChunkDataUtility.cs -> public static void AddEmptyChunk(Archetype* archetype, Chunk* chunk, SharedComponentValues sharedComponentValues) !!!!
-
 	class Chunk {
 	private:
 		static unsigned long SequenceNumber; // Incrementing automatically for each chunk

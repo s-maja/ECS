@@ -5,10 +5,6 @@ ECS::ArchetypeChunkArray::ArchetypeChunkArray()
 	count = 0;
 	unsigned long chunkPtrSize = (unsigned long)(sizeof(Chunk*) * ChunkPtrCapacity);
 	chunks = (Chunk**)malloc(chunkPtrSize);
-
-	for (int i = 0; i < ChunkPtrCapacity; i++) {
-		//init chunks
-	}
 }
 
 ECS::ArchetypeChunkArray::~ArchetypeChunkArray()

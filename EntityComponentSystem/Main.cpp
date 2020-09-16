@@ -1,10 +1,14 @@
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
 #include "ECS.h"
 #include "MovementComponent.h"
 #include "LifetimeComponent.h"
 #include "PlayerComponent.h"
-#include "EnamyComponent.h"
+#include "EnemyComponent.h"
 #include "PlayerSystem.h"
-#include "EnamySystem.h"
+#include "EnemySystem.h"
 #include "LifetimeSystem.h"
 
 void Game1() {
@@ -12,21 +16,21 @@ void Game1() {
     EntityManager* entityManager = ECS::ECS_Engine->GetEntityManager();
     SystemManager* systemManager = ECS::ECS_Engine->GetSystemManager();
 
+    //creating component types
     ComponentType movementComponent = entityManager->CreateComponentType<Movement>();
     ComponentType lifeTimeComponent = entityManager->CreateComponentType<Lifetime>();
     ComponentType playerComponent = entityManager->CreateComponentType<PlayerComponent>();
-    ComponentType enamyComponent = entityManager->CreateComponentType<EnamyComponent>();
+    ComponentType enamyComponent = entityManager->CreateComponentType<EnemyComponent>();
 
+    //creating entities
     Entity enamy1 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
     Entity enamy2 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
     Entity enamy3 = entityManager->CreateEntity({ movementComponent, lifeTimeComponent, enamyComponent });
-
     Entity player1 = entityManager->CreateEntity({ movementComponent });
 
     bool has;
     has = entityManager->HasComponent(player1, playerComponent);
     cout << "Player has playerComponent: " << has << endl;
-
 
     entityManager->AddComponent(player1, playerComponent);
 
@@ -58,14 +62,52 @@ void Game1() {
         cout << allEntites[i].GetID() << endl;
     }
 
-    cout << endl << "kraj komponenti" << endl;
-
+    //add all systems
     PlayerSystem* playerSystem = (PlayerSystem*)systemManager->AddSystem<PlayerSystem>();
-    EnamySystem* enamySystem = (EnamySystem*)systemManager->AddSystem<EnamySystem>();
+    EnemySystem* enemySystem = (EnemySystem*)systemManager->AddSystem<EnemySystem>();
     LifetimeSystem* lifetimeSystem = (LifetimeSystem*)systemManager->AddSystem<LifetimeSystem>();
 
-    systemManager->AddSystemDependency(lifetimeSystem, enamySystem);
+    systemManager->AddSystemDependency(lifetimeSystem, enemySystem);
 
+}
+
+
+void Test1() {
+    int number = 100000;
+    PlayerComponent** playerComponentsOOP = new PlayerComponent*[number];
+    for (int i = 0; i < number; i++) {
+        playerComponentsOOP[i] = new PlayerComponent();
+        playerComponentsOOP[i]->speed = 0;
+    }
+
+    EntityManager* entityManager = ECS::ECS_Engine->GetEntityManager();
+    ComponentType playerComponent = entityManager->CreateComponentType<PlayerComponent>();
+    for (int i = 0; i < number; i++) {
+        Entity enamy1 = entityManager->CreateEntity({ playerComponent });
+    }
+    int count;
+    PlayerComponent** components = entityManager->GetComponentsWithType<PlayerComponent>(&count);
+
+    cout << "Size of component: " << sizeof(PlayerComponent) << endl;
+
+    //test speed of object-oriented desgin
+    auto start = high_resolution_clock::now();
+    for (int i = 0; i < number; i++) {
+        playerComponentsOOP[i]->speed += 1;
+    }
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start); 
+    cout << "Time taken in OO design is : " << duration.count() << " microsec " << endl;
+
+    //test speed in ecs
+    start = high_resolution_clock::now();
+    for (int i = 0; i < count; i++) {
+        components[i]->speed += 1;
+    }
+    stop = high_resolution_clock::now();
+    duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken in ECS is : " << duration.count() << " microsec " << endl;
+    cout << endl;
 }
 
 int main() {
@@ -77,10 +119,9 @@ int main() {
 
     bool bQuit = false;
 
-    //call Test methodes
-    //initialization of game world at the begining 
-    //all future changes are done using systems
-    Game1();
+    //Test1();
+
+     Game1();
 
     // run main loop until quit
     while (bQuit == false)
@@ -89,7 +130,7 @@ int main() {
         ECS::ECS_Engine->Update(DELTA_TIME_STEP);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(60));
-
+        
     }
 
     // destroy global 'Engine' object

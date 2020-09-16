@@ -4,5 +4,5 @@ using namespace ECS;
 
 class PlayerComponent : public IComponent {
 public:
-	float speed;
+	int speed;
 };

@@ -7,9 +7,6 @@
 
 namespace ECS {
 
-	/* Contains one or more ArchetypeChunk and one Archetype which is description 
-	   of components which is saved in this archetype. */
-
 	class ArchetypeChunkArray {
 	private:
 		Chunk** chunks;

@@ -1,5 +1,20 @@
 ﻿  EnamySystem.cpp
+  Engine.cpp
+  EntityManager.cpp
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\EntityManager.cpp(8,41): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\EntityManager.cpp(491,40): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   LifetimeSystem.cpp
+  Main.cpp
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(48,32): warning C4244: 'argument': conversion from 'const uint64_t' to 'const _Kty', possible loss of data
+          with
+          [
+              _Kty=int
+          ]
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\Main.cpp(67): message : see reference to function template instantiation 'ECS::ISystem *ECS::SystemManager::AddSystem<PlayerSystem>(void)' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(632): message : see reference to class template instantiation 'std::chrono::duration<double,std::ratio<1,1>>' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(178): message : see reference to class template instantiation 'std::chrono::duration<__int64,std::nano>' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(610): message : see reference to class template instantiation 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' being compiled
+C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\SystemManager.h(58,18): warning C4244: 'argument': conversion from 'const uint64_t' to 'const int', possible loss of data
   PlayerSystem.cpp
   Generating Code...
   EntityComponentSystem.vcxproj -> C:\Users\Maja\Desktop\Diplomski\EntityComponentSystem\x64\Debug\EntityComponentSystem.exe
